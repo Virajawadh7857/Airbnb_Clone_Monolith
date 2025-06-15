@@ -3,8 +3,10 @@ package com.airbnb.service;
 import com.airbnb.dto.PropertyRequest;
 import com.airbnb.dto.PropertyResponse;
 import com.airbnb.entity.Property;
+import com.airbnb.entity.Review;
 import com.airbnb.entity.User;
 import com.airbnb.repository.PropertyRepository;
+import com.airbnb.repository.ReviewRepository;
 import com.airbnb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,10 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private ReviewRepository reviewRepository;
+
 
     @Override
     public PropertyResponse createProperty(PropertyRequest request, String hostEmail) {
@@ -59,6 +65,12 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     private PropertyResponse mapToResponse(Property property) {
+        List<Review> reviews = reviewRepository.findByProperty(property);
+        double averageRating = reviews.stream()
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0.0);
+
         return PropertyResponse.builder()
                 .id(property.getId())
                 .title(property.getTitle())
@@ -68,8 +80,11 @@ public class PropertyServiceImpl implements PropertyService {
                 .maxGuests(property.getMaxGuests())
                 .imageUrl(property.getImageUrl())
                 .hostEmail(property.getHost().getEmail())
+                .averageRating(averageRating)
                 .build();
     }
+
+
     
     @Override
     public PropertyResponse getPropertyById(Long id) {

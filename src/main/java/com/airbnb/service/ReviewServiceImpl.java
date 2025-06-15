@@ -1,6 +1,7 @@
 package com.airbnb.service;
 
 import com.airbnb.dto.ReviewRequest;
+
 import com.airbnb.dto.ReviewResponse;
 import com.airbnb.entity.Property;
 import com.airbnb.entity.Review;
@@ -47,10 +48,15 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewResponse> getPropertyReviews(Long propertyId) {
-        return reviewRepository.findByPropertyId(propertyId).stream()
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        return reviewRepository.findByProperty(property)
+                .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
+
 
     private ReviewResponse mapToResponse(Review review) {
         return ReviewResponse.builder()

@@ -15,4 +15,6 @@ public class PropertyResponse {
     private int    maxGuests;
     private String imageUrl;
     private String hostEmail;
+    private double averageRating; 
+
 }
