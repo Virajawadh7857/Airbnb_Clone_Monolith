@@ -107,4 +107,20 @@ public class BookingServiceImpl implements BookingService {
                 .status(booking.getStatus())
                 .build();
     }
+
+	
+
+	@Override
+	public long countAll() {
+	    return bookingRepository.count();
+	}
+
+	@Override
+	public long countHostBookings(String hostEmail) {
+	    User host = userRepository.findByEmail(hostEmail)
+	        .orElseThrow(() -> new RuntimeException("Host not found"));
+
+	    return bookingRepository.countByProperty_Host(host);
+	}
+
 }

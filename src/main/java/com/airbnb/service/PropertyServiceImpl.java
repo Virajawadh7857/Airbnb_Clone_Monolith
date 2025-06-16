@@ -8,6 +8,7 @@ import com.airbnb.entity.User;
 import com.airbnb.repository.PropertyRepository;
 import com.airbnb.repository.ReviewRepository;
 import com.airbnb.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +23,9 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private ReviewRepository reviewRepository;
-
 
     @Override
     public PropertyResponse createProperty(PropertyRequest request, String hostEmail) {
@@ -37,19 +37,19 @@ public class PropertyServiceImpl implements PropertyService {
                 .description(request.getDescription())
                 .location(request.getLocation())
                 .pricePerNight(request.getPricePerNight())
-                .maxGuests(request.getMaxGuests()) 
+                .maxGuests(request.getMaxGuests())
                 .imageUrl(request.getImageUrl())
                 .host(host)
                 .build();
 
         Property saved = propertyRepository.save(property);
-
         return mapToResponse(saved);
     }
 
     @Override
     public List<PropertyResponse> getAllProperties() {
-        return propertyRepository.findAll().stream()
+        return propertyRepository.findAll()
+                .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -59,33 +59,12 @@ public class PropertyServiceImpl implements PropertyService {
         User host = userRepository.findByEmail(hostEmail)
                 .orElseThrow(() -> new RuntimeException("Host not found"));
 
-        return propertyRepository.findByHost(host).stream()
+        return propertyRepository.findByHost(host)
+                .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    private PropertyResponse mapToResponse(Property property) {
-        List<Review> reviews = reviewRepository.findByProperty(property);
-        double averageRating = reviews.stream()
-                .mapToInt(Review::getRating)
-                .average()
-                .orElse(0.0);
-
-        return PropertyResponse.builder()
-                .id(property.getId())
-                .title(property.getTitle())
-                .description(property.getDescription())
-                .location(property.getLocation())
-                .pricePerNight(property.getPricePerNight())
-                .maxGuests(property.getMaxGuests())
-                .imageUrl(property.getImageUrl())
-                .hostEmail(property.getHost().getEmail())
-                .averageRating(averageRating)
-                .build();
-    }
-
-
-    
     @Override
     public PropertyResponse getPropertyById(Long id) {
         Property property = propertyRepository.findById(id)
@@ -125,4 +104,37 @@ public class PropertyServiceImpl implements PropertyService {
         propertyRepository.delete(property);
     }
 
+    private PropertyResponse mapToResponse(Property property) {
+        List<Review> reviews = reviewRepository.findByProperty(property);
+
+        double averageRating = reviews.isEmpty() ? 0.0 :
+                reviews.stream()
+                        .mapToDouble(Review::getRating)
+                        .average()
+                        .orElse(0.0);
+
+        return PropertyResponse.builder()
+                .id(property.getId())
+                .title(property.getTitle())
+                .description(property.getDescription())
+                .location(property.getLocation())
+                .pricePerNight(property.getPricePerNight())
+                .maxGuests(property.getMaxGuests())
+                .imageUrl(property.getImageUrl())
+                .hostEmail(property.getHost().getEmail())
+                .averageRating(averageRating)
+                .build();
+    }
+
+    @Override
+    public long countAll() {
+        return propertyRepository.count();
+    }
+
+    @Override
+    public long countHostProperties(String hostEmail) {
+        User host = userRepository.findByEmail(hostEmail)
+                .orElseThrow(() -> new RuntimeException("Host not found"));
+        return propertyRepository.countByHost(host);
+    }
 }

@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PropertyRepository extends JpaRepository<Property, Long> {
     List<Property> findByHost(User host);
+
+	long countByHost(User host);
 }

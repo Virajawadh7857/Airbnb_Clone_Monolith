@@ -29,5 +29,14 @@ public class User {
 
     @OneToMany(mappedBy = "host", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Property> properties;
+    
+    @ManyToMany
+    @JoinTable(
+        name = "user_favorites",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "property_id")
+    )
+    private List<Property> favorites = new ArrayList<>();
+
 
 }

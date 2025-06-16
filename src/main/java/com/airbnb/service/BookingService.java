@@ -11,4 +11,7 @@ public interface BookingService {
     List<BookingResponse> getGuestBookings(String guestEmail);
     List<BookingResponse> getHostBookings(String hostEmail);
     void cancelBooking(Long bookingId, String guestEmail);
+	long countAll();
+	long countHostBookings(String hostEmail);
+	
 }

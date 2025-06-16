@@ -1,55 +1,74 @@
 package com.airbnb.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.airbnb.dto.AuthResponse;
 import com.airbnb.dto.LoginRequest;
+import com.airbnb.dto.PropertyResponse;
 import com.airbnb.entity.User;
 import com.airbnb.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.registerUser(user));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(userService.loginUser(loginRequest));
     }
-    
-    @GetMapping("/admin")
+
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin")
     public ResponseEntity<String> testAdminAccess() {
         return ResponseEntity.ok("You are an admin.");
     }
-    
-    @GetMapping("/host")
+
     @PreAuthorize("hasRole('HOST')")
-    public ResponseEntity<String> testHost() {
+    @GetMapping("/host")
+    public ResponseEntity<String> testHostAccess() {
         return ResponseEntity.ok("You are a host.");
     }
 
-    @GetMapping("/guest")
     @PreAuthorize("hasRole('GUEST')")
-    public ResponseEntity<String> testGuest() {
+    @GetMapping("/guest")
+    public ResponseEntity<String> testGuestAccess() {
         return ResponseEntity.ok("You are a guest.");
     }
 
+    // Favorites
+    @PreAuthorize("hasRole('GUEST')")
+    @PostMapping("/favorites/{propertyId}")
+    public ResponseEntity<String> addFavorite(@PathVariable Long propertyId, Authentication authentication) {
+        String email = authentication.getName();
+        userService.addToFavorites(email, propertyId);
+        return ResponseEntity.ok("Added to favorites.");
+    }
 
+    @PreAuthorize("hasRole('GUEST')")
+    @DeleteMapping("/favorites/{propertyId}")
+    public ResponseEntity<String> removeFavorite(@PathVariable Long propertyId, Authentication authentication) {
+        String email = authentication.getName();
+        userService.removeFromFavorites(email, propertyId);
+        return ResponseEntity.ok("Removed from favorites.");
+    }
+
+    @PreAuthorize("hasRole('GUEST')")
+    @GetMapping("/favorites")
+    public ResponseEntity<List<PropertyResponse>> getFavorites(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(userService.getFavoriteProperties(email));
+    }
 }
-

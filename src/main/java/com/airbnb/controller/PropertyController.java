@@ -3,10 +3,10 @@ package com.airbnb.controller;
 import com.airbnb.dto.PropertyRequest;
 import com.airbnb.dto.PropertyResponse;
 import com.airbnb.service.PropertyService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,55 +18,46 @@ public class PropertyController {
     @Autowired
     private PropertyService propertyService;
 
-    // Host creates a property
     @PreAuthorize("hasRole('HOST')")
     @PostMapping
-    public PropertyResponse createProperty(@RequestBody PropertyRequest request, Authentication authentication) {
+    public ResponseEntity<PropertyResponse> createProperty(@RequestBody PropertyRequest request, Authentication authentication) {
         String email = authentication.getName();
-        return propertyService.createProperty(request, email);
+        return ResponseEntity.ok(propertyService.createProperty(request, email));
     }
 
-    // Guest views all properties
     @PreAuthorize("hasRole('GUEST')")
     @GetMapping
-    public List<PropertyResponse> getAllProperties() {
-        return propertyService.getAllProperties();
+    public ResponseEntity<List<PropertyResponse>> getAllProperties() {
+        return ResponseEntity.ok(propertyService.getAllProperties());
     }
 
-    // Host views only their own properties
     @PreAuthorize("hasRole('HOST')")
     @GetMapping("/host")
-    public List<PropertyResponse> getHostProperties(Authentication authentication) {
+    public ResponseEntity<List<PropertyResponse>> getHostProperties(Authentication authentication) {
         String email = authentication.getName();
-        return propertyService.getHostProperties(email);
+        return ResponseEntity.ok(propertyService.getHostProperties(email));
     }
-    
- // GET property by ID
+
     @PreAuthorize("hasAnyRole('GUEST', 'HOST')")
     @GetMapping("/{id}")
-    public PropertyResponse getPropertyById(@PathVariable Long id) {
-        return propertyService.getPropertyById(id);
+    public ResponseEntity<PropertyResponse> getPropertyById(@PathVariable Long id) {
+        return ResponseEntity.ok(propertyService.getPropertyById(id));
     }
 
-    // PUT update property (host only)
     @PreAuthorize("hasRole('HOST')")
     @PutMapping("/{id}")
-    public PropertyResponse updateProperty(@PathVariable Long id,
-                                           @RequestBody PropertyRequest request,
-                                           Authentication authentication) {
+    public ResponseEntity<PropertyResponse> updateProperty(@PathVariable Long id,
+                                                           @RequestBody PropertyRequest request,
+                                                           Authentication authentication) {
         String email = authentication.getName();
-        return propertyService.updateProperty(id, request, email);
+        return ResponseEntity.ok(propertyService.updateProperty(id, request, email));
     }
-    
 
-    // DELETE property (host only)
     @PreAuthorize("hasRole('HOST')")
     @DeleteMapping("/{id}")
-    public String deleteProperty(@PathVariable Long id,
-                                 Authentication authentication) {
+    public ResponseEntity<String> deleteProperty(@PathVariable Long id, Authentication authentication) {
         String email = authentication.getName();
         propertyService.deleteProperty(id, email);
-        return "Property deleted successfully";
+        return ResponseEntity.ok("Property deleted successfully");
     }
-
 }

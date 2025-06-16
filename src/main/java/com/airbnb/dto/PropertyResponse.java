@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class PropertyResponse {
+	
     private Long id;
     private String title;
     private String description;

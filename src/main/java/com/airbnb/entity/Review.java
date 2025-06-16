@@ -29,7 +29,7 @@ public class Review {
     @JoinColumn(name="property_id")
     private Property property;
 
-    private float rating; // out of 5
+    private int rating; // out of 5
     private String comment;
 }
 

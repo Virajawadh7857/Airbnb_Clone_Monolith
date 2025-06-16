@@ -6,6 +6,7 @@ import com.airbnb.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,13 +20,13 @@ public class ReviewController {
 
     @PreAuthorize("hasRole('GUEST')")
     @PostMapping
-    public ReviewResponse leaveReview(@RequestBody ReviewRequest request, Authentication authentication) {
+    public ResponseEntity<ReviewResponse> leaveReview(@RequestBody ReviewRequest request, Authentication authentication) {
         String email = authentication.getName();
-        return reviewService.leaveReview(request, email);
+        return ResponseEntity.ok(reviewService.leaveReview(request, email));
     }
 
     @GetMapping("/property/{propertyId}")
-    public List<ReviewResponse> getPropertyReviews(@PathVariable Long propertyId) {
-        return reviewService.getPropertyReviews(propertyId);
+    public ResponseEntity<List<ReviewResponse>> getPropertyReviews(@PathVariable Long propertyId) {
+        return ResponseEntity.ok(reviewService.getPropertyReviews(propertyId));
     }
 }
