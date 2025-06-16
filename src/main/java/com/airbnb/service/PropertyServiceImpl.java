@@ -2,6 +2,7 @@ package com.airbnb.service;
 
 import com.airbnb.dto.PropertyRequest;
 import com.airbnb.dto.PropertyResponse;
+import com.airbnb.dto.PropertySearchRequest;
 import com.airbnb.entity.Property;
 import com.airbnb.entity.Review;
 import com.airbnb.entity.User;
@@ -137,4 +138,16 @@ public class PropertyServiceImpl implements PropertyService {
                 .orElseThrow(() -> new RuntimeException("Host not found"));
         return propertyRepository.countByHost(host);
     }
+    
+ // PropertyServiceImpl.java
+    @Override
+    public List<Property> searchProperties(PropertySearchRequest request) {
+        return propertyRepository.searchProperties(
+            request.getLocation(),
+            request.getMinPrice(),
+            request.getMaxPrice(),
+            request.getMinGuests()
+        );
+    }
+
 }

@@ -5,7 +5,9 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,6 +23,7 @@ public class Booking {
     @ManyToOne
     private Property property;
 
+    @Column(nullable = false)
     private int guestCount;
 
     private LocalDate startDate;

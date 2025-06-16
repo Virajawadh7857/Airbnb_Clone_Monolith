@@ -2,6 +2,8 @@ package com.airbnb.service;
 
 import com.airbnb.dto.PropertyRequest;
 import com.airbnb.dto.PropertyResponse;
+import com.airbnb.dto.PropertySearchRequest;
+import com.airbnb.entity.Property;
 
 import java.util.List;
 
@@ -15,6 +17,8 @@ public interface PropertyService {
     void deleteProperty(Long id, String hostEmail);
     long countAll();
     long countHostProperties(String hostEmail);
+    List<Property> searchProperties(PropertySearchRequest request);
+
 
 
 }

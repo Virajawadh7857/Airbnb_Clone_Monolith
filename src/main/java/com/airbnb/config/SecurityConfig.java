@@ -37,11 +37,20 @@ public class SecurityConfig {
             .csrf().disable()
             .authorizeHttpRequests()
                 .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-                .requestMatchers("/api/users/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/users/host/**").hasRole("HOST")
-                .requestMatchers("/api/users/guest/**").hasRole("GUEST")
-                .requestMatchers("/api/properties").hasRole("HOST")
 
+                // Admin access
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                // Host access
+                .requestMatchers("/api/host/**").hasRole("HOST")
+
+                // Guest access
+                .requestMatchers("/api/guest/**").hasRole("GUEST")
+
+                // Property browsing for everyone, management for host
+                .requestMatchers("/api/properties/**").permitAll()
+
+                // Any other request must be authenticated
                 .anyRequest().authenticated()
             .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -51,6 +60,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

@@ -3,6 +3,7 @@ package com.airbnb.repository;
 import com.airbnb.entity.Property;
 import com.airbnb.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -10,4 +11,12 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     List<Property> findByHost(User host);
 
 	long countByHost(User host);
+	
+	@Query("SELECT p FROM Property p WHERE " +
+	           "(:location IS NULL OR LOWER(p.location) LIKE LOWER(CONCAT('%', :location, '%'))) AND " +
+	           "(:minPrice IS NULL OR p.pricePerNight >= :minPrice) AND " +
+	           "(:maxPrice IS NULL OR p.pricePerNight <= :maxPrice) AND " +
+	           "(:minGuests IS NULL OR p.maxGuests >= :minGuests)")
+	    List<Property> searchProperties(String location, Integer minPrice, Integer maxPrice, Integer minGuests);
+	
 }
