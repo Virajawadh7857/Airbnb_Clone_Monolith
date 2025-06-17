@@ -139,15 +139,26 @@ public class PropertyServiceImpl implements PropertyService {
         return propertyRepository.countByHost(host);
     }
     
- // PropertyServiceImpl.java
     @Override
     public List<Property> searchProperties(PropertySearchRequest request) {
-        return propertyRepository.searchProperties(
-            request.getLocation(),
-            request.getMinPrice(),
-            request.getMaxPrice(),
-            request.getMinGuests()
-        );
+        if (request.getStartDate() != null && request.getEndDate() != null) {
+            return propertyRepository.searchAvailableProperties(
+                request.getLocation(),
+                request.getMinPrice(),
+                request.getMaxPrice(),
+                request.getMinGuests(),
+                request.getStartDate(),
+                request.getEndDate()
+            );
+        } else {
+            return propertyRepository.searchProperties(
+                request.getLocation(),
+                request.getMinPrice(),
+                request.getMaxPrice(),
+                request.getMinGuests()
+            );
+        }
     }
+
 
 }

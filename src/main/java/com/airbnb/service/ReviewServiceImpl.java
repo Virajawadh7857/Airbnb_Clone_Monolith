@@ -1,7 +1,6 @@
 package com.airbnb.service;
 
 import com.airbnb.dto.ReviewRequest;
-
 import com.airbnb.dto.ReviewResponse;
 import com.airbnb.entity.Property;
 import com.airbnb.entity.Review;
@@ -35,6 +34,11 @@ public class ReviewServiceImpl implements ReviewService {
         Property property = propertyRepository.findById(request.getPropertyId())
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
+        // ✅ Check if the guest already reviewed this property
+        if (reviewRepository.existsByGuestAndProperty(guest, property)) {
+            throw new RuntimeException("You have already reviewed this property.");
+        }
+
         Review review = Review.builder()
                 .guest(guest)
                 .property(property)
@@ -51,12 +55,12 @@ public class ReviewServiceImpl implements ReviewService {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
-        return reviewRepository.findByProperty(property)
+        // ✅ Updated to sort reviews by latest first (createdAt DESC)
+        return reviewRepository.findByPropertyOrderByCreatedAtDesc(property)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
-
 
     private ReviewResponse mapToResponse(Review review) {
         return ReviewResponse.builder()
