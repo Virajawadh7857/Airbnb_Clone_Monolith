@@ -21,6 +21,9 @@ public class User {
 
     @Column(unique = true)
     private String email;
+    
+    @Column( unique = true)
+    private String phoneNumber;
 
     private String password;
 
@@ -37,6 +40,8 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "property_id")
     )
     private List<Property> favorites = new ArrayList<>();
+
+	
 
 
 }

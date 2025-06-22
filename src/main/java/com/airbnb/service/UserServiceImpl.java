@@ -3,6 +3,7 @@ package com.airbnb.service;
 import com.airbnb.dto.AuthResponse;
 import com.airbnb.dto.LoginRequest;
 import com.airbnb.dto.PropertyResponse;
+import com.airbnb.dto.UserDTO;
 import com.airbnb.entity.Property;
 import com.airbnb.entity.Review;
 import com.airbnb.entity.Role;
@@ -13,7 +14,6 @@ import com.airbnb.repository.UserRepository;
 import com.airbnb.security.JwtService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,10 +40,17 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists..!");
         }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         if (user.getRole() == null) {
             user.setRole(Role.GUEST);  // default role
         }
+
+        if (user.getPhoneNumber() == null || user.getPhoneNumber().isBlank()) {
+            throw new RuntimeException("Phone number is required for registration.");
+        }
+
         user.setFavorites(new ArrayList<>()); // initialize favorites list
         return userRepository.save(user);
     }
@@ -118,4 +125,13 @@ public class UserServiceImpl implements UserService {
                 .averageRating(avgRating)
                 .build();
     }
+
+	@Override
+	public UserDTO mapToUserDTO(User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    
+  
+
 }

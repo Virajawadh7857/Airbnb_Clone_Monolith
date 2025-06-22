@@ -3,8 +3,12 @@ package com.airbnb.controller;
 import com.airbnb.dto.AuthResponse;
 import com.airbnb.dto.LoginRequest;
 import com.airbnb.dto.PropertyResponse;
+import com.airbnb.dto.UserDTO;
 import com.airbnb.entity.User;
+import com.airbnb.repository.UserRepository;
 import com.airbnb.service.UserService;
+import com.airbnb.service.UserServiceImpl;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,12 +23,27 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired private UserRepository userRepository;
+    
+
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.registerUser(user));
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<UserDTO> getCurrentUserProfile(Authentication authentication) {
+        String email = authentication.getName(); // JWT-based
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Using your private method from UserServiceImpl
+        UserDTO dto = ((UserServiceImpl) userService).mapToUserDTO(user);
+        return ResponseEntity.ok(dto);
+    }
+    
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(userService.loginUser(loginRequest));

@@ -24,6 +24,8 @@ public class BookingServiceImpl implements BookingService {
     @Autowired
     private PropertyRepository propertyRepository;
 
+    // Create a new booking after validating the property availability and guest count.
+     
     @Override
     public BookingResponse createBooking(BookingRequest request, String guestEmail) {
         User guest = userRepository.findByEmail(guestEmail)
@@ -46,6 +48,7 @@ public class BookingServiceImpl implements BookingService {
             throw new RuntimeException("Guest count exceeds property's max limit");
         }
 
+        // Save booking
         Booking booking = Booking.builder()
                 .guest(guest)
                 .property(property)
@@ -55,10 +58,14 @@ public class BookingServiceImpl implements BookingService {
                 .status(BookingStatus.PENDING)
                 .build();
 
-        Booking saved = bookingRepository.save(booking);
-        return mapToResponse(saved);
+        booking = bookingRepository.save(booking); // Save to DB
+
+        return mapToResponse(booking); // Return DTO
     }
 
+    
+     // Get all bookings in the system.
+     
     @Override
     public List<BookingResponse> getAllBookings() {
         return bookingRepository.findAll()
@@ -67,6 +74,9 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    
+     // Get all bookings for a guest.
+     
     @Override
     public List<BookingResponse> getGuestBookings(String guestEmail) {
         User guest = userRepository.findByEmail(guestEmail)
@@ -78,6 +88,9 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    
+     // Get all bookings for properties owned by a host.
+     
     @Override
     public List<BookingResponse> getHostBookings(String hostEmail) {
         User host = userRepository.findByEmail(hostEmail)
@@ -91,6 +104,9 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    
+     // Cancel a booking if it belongs to the requesting guest.
+     
     @Override
     public void cancelBooking(Long bookingId, String guestEmail) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -104,11 +120,17 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(booking);
     }
 
+    
+     // Count all bookings.
+     
     @Override
     public long countAll() {
         return bookingRepository.count();
     }
 
+    
+     // Count all bookings made on properties owned by a specific host.
+     
     @Override
     public long countHostBookings(String hostEmail) {
         User host = userRepository.findByEmail(hostEmail)
@@ -117,6 +139,9 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.countByProperty_Host(host);
     }
 
+    
+     // Map Booking entity to BookingResponse DTO.
+     
     private BookingResponse mapToResponse(Booking booking) {
         return BookingResponse.builder()
                 .id(booking.getId())
